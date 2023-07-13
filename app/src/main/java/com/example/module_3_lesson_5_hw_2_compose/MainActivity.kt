@@ -1,6 +1,9 @@
 package com.example.module_3_lesson_5_hw_2_compose
 
 import android.os.Bundle
+import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -29,6 +32,7 @@ import androidx.compose.ui.Modifier
 import com.example.module_3_lesson_5_hw_2_compose.ui.theme.Module_3_Lesson_5_hw_2_ComposeTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -42,9 +46,16 @@ import com.example.module_3_lesson_5_hw_2_compose.ui.theme.Pink50
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val timer = Timer()
+
         setContent {
             Module_3_Lesson_5_hw_2_ComposeTheme {
-                MyApp()
+                MyApp(timer)
+
+                Button(onClick = { timer.startTest(10L) }) {
+                    Text(text = "START")
+                }
             }
         }
     }
@@ -52,8 +63,9 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyApp() {
+fun MyApp(timer: Timer) {
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     var timerTextfieldSeconds by remember { mutableStateOf("") }
@@ -61,6 +73,8 @@ fun MyApp() {
     var timerTextHours by remember { mutableStateOf("00") }
     var timerTextMinutes by remember { mutableStateOf("00") }
     var timerTextSeconds by remember { mutableStateOf("00") }
+
+//    val timerTest = Timer()
 
     Box(
         modifier = Modifier
@@ -143,13 +157,26 @@ fun MyApp() {
             Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_medium)))
             Button(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                onClick = { /*TODO*/ }
+                onClick = {
+                    if (timerTextfieldSeconds.equals("")) {
+                        Toast.makeText(
+                            context,
+                            R.string.toast_no_time,
+                            Toast.LENGTH_SHORT
+                        ).apply {
+                            setGravity(Gravity.CENTER, 0, 0)
+                            show()
+                        }
+                    } else {
+                        timer.start(timerTextfieldSeconds.toLong())
+                    }
+                }
             ) {
                 Text(text = stringResource(id = R.string.button_start))
             }
             Button(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                onClick = { /*TODO*/ }
+                onClick = { timer.stop() }
             ) {
                 Text(text = stringResource(id = R.string.button_stop))
             }

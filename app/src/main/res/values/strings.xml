@@ -7,4 +7,5 @@
     <string name="button_stop">Stop Timer</string>
     <string name="time_showing_less_than_hour">%s : %s</string>
     <string name="time_showing_more_than_hour">%s : %s : %s</string>
+    <string name="toast_no_time">Please, input something</string>
 </resources>
