@@ -25,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.module_3_lesson_5_hw_2_compose.ui.theme.Pink50
 
 class MainActivity : ComponentActivity() {
@@ -51,11 +53,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Module_3_Lesson_5_hw_2_ComposeTheme {
-                MyApp(timer)
+                MyApp(timer = timer)
 
-                Button(onClick = { timer.startTest(10L) }) {
-                    Text(text = "START")
-                }
             }
         }
     }
@@ -63,18 +62,17 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyApp(timer: Timer) {
+fun MyApp(
+    appViewModel: AppViewModel = viewModel(),
+    timer: Timer
+) {
+
+    val appUiState by appViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     var timerTextfieldSeconds by remember { mutableStateOf("") }
-
-    var timerTextHours by remember { mutableStateOf("00") }
-    var timerTextMinutes by remember { mutableStateOf("00") }
-    var timerTextSeconds by remember { mutableStateOf("00") }
-
-//    val timerTest = Timer()
 
     Box(
         modifier = Modifier
@@ -82,6 +80,22 @@ fun MyApp(timer: Timer) {
             .background(Pink50)
             .clickable { focusManager.clearFocus() }
     ) {
+
+        Column() {
+            Button(onClick = {
+                appViewModel.startTimer(5L)
+            }) { Text(text = "START") }
+            Button(onClick = {
+                appViewModel.stopTimer()
+            }) { Text(text = "STOP") }
+            Button(onClick = {
+                appViewModel.resetTime()
+            }) { Text(text = "RESET") }
+            Text(text = appUiState.currentHours)
+            Text(text = appUiState.currentMinutes)
+            Text(text = appUiState.currentSeconds)
+        }
+
         Column(
             modifier = Modifier.align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -98,18 +112,18 @@ fun MyApp(timer: Timer) {
                     vertical = dimensionResource(id = R.dimen.padding_small),
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 ),
-                text = if (timerTextHours == "00") {
+                text = if (appUiState.currentHours == "00") {
                     stringResource(
                         id = R.string.time_showing_less_than_hour,
-                        timerTextMinutes,
-                        timerTextSeconds
+                        appUiState.currentMinutes,
+                        appUiState.currentSeconds
                     )
                 } else {
                     stringResource(
                         id = R.string.time_showing_more_than_hour,
-                        timerTextHours,
-                        timerTextMinutes,
-                        timerTextSeconds
+                        appUiState.currentHours,
+                        appUiState.currentMinutes,
+                        appUiState.currentSeconds
                     )
                 },
                 fontSize = 36.sp,
@@ -127,19 +141,18 @@ fun MyApp(timer: Timer) {
                 modifier = Modifier,
                 value = timerTextfieldSeconds,
                 onValueChange = { newValue ->
-                    var totalSeconds = newValue.toLongOrNull() ?: 0
-                    if (totalSeconds > 3599999) {
-                        totalSeconds = 3599999
-                        timerTextfieldSeconds = totalSeconds.toString()
+                    if (!newValue.equals("")) {
+                        if (newValue.toLong() > 3599999) {
+                            timerTextfieldSeconds = "3599999"
+                            appViewModel.calculateTime(newValue = newValue)
+                        } else {
+                            timerTextfieldSeconds = newValue
+                            appViewModel.calculateTime(newValue = newValue)
+                        }
                     } else {
                         timerTextfieldSeconds = newValue
+                        appViewModel.resetTime()
                     }
-                    val hours = totalSeconds / 3600
-                    val minutes = (totalSeconds % 3600) / 60
-                    val seconds = totalSeconds % 60
-                    timerTextHours = String.format("%02d", hours)
-                    timerTextMinutes = String.format("%02d", minutes)
-                    timerTextSeconds = String.format("%02d", seconds)
 
                 },
                 label = { Text(text = stringResource(id = R.string.seconds)) },
@@ -186,3 +199,22 @@ fun MyApp(timer: Timer) {
 }
 
 
+//OutlinedTextField(
+//modifier = Modifier,
+//value = timerTextfieldSeconds,
+//onValueChange = { newValue ->
+//    var totalSeconds = newValue.toLongOrNull() ?: 0
+//    if (totalSeconds > 3599999) {
+//        totalSeconds = 3599999
+//        timerTextfieldSeconds = totalSeconds.toString()
+//    } else {
+//        timerTextfieldSeconds = newValue
+//    }
+//    val hours = totalSeconds / 3600
+//    val minutes = (totalSeconds % 3600) / 60
+//    val seconds = totalSeconds % 60
+//    timerTextHours = String.format("%02d", hours)
+//    timerTextMinutes = String.format("%02d", minutes)
+//    timerTextSeconds = String.format("%02d", seconds)
+//
+//},

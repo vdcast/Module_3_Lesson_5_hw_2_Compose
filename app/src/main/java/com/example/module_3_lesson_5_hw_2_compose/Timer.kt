@@ -14,10 +14,6 @@ class Timer() {
         timer = object : DisposableSubscriber<Long>() {
             override fun onNext(t: Long?) {
                 Log.d("MYLOG", "3 next : $t")
-
-
-//                timerTextHours = String.format("%02d", hours)
-
             }
 
             override fun onError(t: Throwable?) {  }
