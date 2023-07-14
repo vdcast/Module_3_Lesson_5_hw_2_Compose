@@ -22,7 +22,21 @@ class AppViewModel: ViewModel() {
 
         timer = object : DisposableSubscriber<Long>() {
             override fun onNext(t: Long?) {
-                Log.d("MYLOG", "4 next : $t")
+                var inputSeconds = 0L
+                if (t != null) {
+                    inputSeconds = until - t
+                }
+                val hours = inputSeconds / 3600
+                val minutes = (inputSeconds % 3600) / 60
+                val seconds = inputSeconds % 60
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        currentHours = String.format("%02d", hours),
+                        currentMinutes = String.format("%02d", minutes),
+                        currentSeconds = String.format("%02d", seconds)
+                    )
+                }
+                Log.d("MYLOG", "4 next : $inputSeconds")
             }
 
             override fun onError(t: Throwable?) {  }
@@ -37,7 +51,10 @@ class AppViewModel: ViewModel() {
     }
 
     fun stopTimer() {
-        timer.dispose()
+        if (::timer.isInitialized) {
+            timer.dispose()
+            resetTimer()
+        }
     }
 
 
@@ -67,7 +84,7 @@ class AppViewModel: ViewModel() {
 
 
 
-    fun resetTime() {
+    fun resetTimer() {
         _uiState.value = AppUiState(
             currentHours = "00",
             currentMinutes = "00",
@@ -76,6 +93,6 @@ class AppViewModel: ViewModel() {
     }
 
     init {
-        resetTime()
+        resetTimer()
     }
 }
