@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -63,6 +64,28 @@ fun MyApp(
     val appUiState by appViewModel.uiState.collectAsState()
 
     var timerTextfieldSeconds by remember { mutableStateOf("") }
+
+    if (appUiState.timerCompleted) {
+        AlertDialog(
+            onDismissRequest = {
+                appViewModel.resetTimer()
+            },
+            title = {
+                Text(text = stringResource(id = R.string.alert_title))
+            },
+            text = {
+                Text(stringResource(id = R.string.alert_text))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        appViewModel.resetTimer()
+                    }) {
+                    Text(stringResource(id = R.string.alert_button))
+                }
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -151,7 +174,7 @@ fun MyApp(
                             R.string.toast_no_time,
                             Toast.LENGTH_SHORT
                         ).apply {
-                            setGravity(Gravity.CENTER, 0, 0)
+                            setGravity(Gravity.BOTTOM, 0, 128)
                             show()
                         }
                     } else {

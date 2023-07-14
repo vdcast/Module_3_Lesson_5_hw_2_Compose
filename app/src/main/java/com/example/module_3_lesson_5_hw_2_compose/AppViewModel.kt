@@ -18,8 +18,18 @@ class AppViewModel: ViewModel() {
 
     private lateinit var timer: DisposableSubscriber<Long>
 
+    init {
+        resetTimer()
+    }
+    fun resetTimer() {
+        _uiState.value = AppUiState(
+            currentHours = "00",
+            currentMinutes = "00",
+            currentSeconds = "00",
+            timerCompleted = false
+        )
+    }
     fun startTimer(until: Long) {
-
         timer = object : DisposableSubscriber<Long>() {
             override fun onNext(t: Long?) {
                 var inputSeconds = 0L
@@ -38,26 +48,24 @@ class AppViewModel: ViewModel() {
                 }
                 Log.d("MYLOG", "4 next : $inputSeconds")
             }
-
             override fun onError(t: Throwable?) {  }
-            override fun onComplete() {  }
-
+            override fun onComplete() {
+                _uiState.update { currentState ->
+                    currentState.copy(timerCompleted = true)
+                }
+            }
         }
-
         Flowable.intervalRange(0, until + 1, 0, 1, TimeUnit.SECONDS)
             .observeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe(timer)
     }
-
     fun stopTimer() {
         if (::timer.isInitialized) {
             timer.dispose()
             resetTimer()
         }
     }
-
-
     fun calculateTime(newValue: String) {
         var totalSeconds = newValue.toLongOrNull() ?: 0
         if (totalSeconds > 3599999) {
@@ -72,27 +80,5 @@ class AppViewModel: ViewModel() {
             currentMinutes = String.format("%02d", minutes),
             currentSeconds = String.format("%02d", seconds)
         )
-//        _uiState.update { currentState ->
-//            currentState.copy(
-//                inputSeconds = totalSeconds.toString(),
-//                currentHours = String.format("%02d", hours),
-//                currentMinutes = String.format("%02d", minutes),
-//                currentSeconds = String.format("%02d", seconds)
-//            )
-//        }
-    }
-
-
-
-    fun resetTimer() {
-        _uiState.value = AppUiState(
-            currentHours = "00",
-            currentMinutes = "00",
-            currentSeconds = "00"
-        )
-    }
-
-    init {
-        resetTimer()
     }
 }

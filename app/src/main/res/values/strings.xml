@@ -8,4 +8,7 @@
     <string name="time_showing_less_than_hour">%s : %s</string>
     <string name="time_showing_more_than_hour">%s : %s : %s</string>
     <string name="toast_no_time">Please, input something</string>
+    <string name="alert_title">Time\'s up</string>
+    <string name="alert_text">Come on, let\'s go! :)</string>
+    <string name="alert_button">OK</string>
 </resources>
